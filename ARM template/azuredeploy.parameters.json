@@ -1,49 +1,77 @@
 {
-        "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+        "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
         "contentVersion": "1.0.0.0",
         "parameters": {
             "name": {
-                "value": "myfirstswadeployment"
+                "type": "string"
             },
-            "location": { 
-                "value": "Central US"
-            },   
+            "location": {
+                "type": "string"
+            },
             "sku": {
-                "value": "Free"
+                "type": "string"
             },
             "skucode": {
-                "value": "Free"
+                "type": "string"
             },
             "repositoryUrl": {
-                "value": "https://github.com/dlachapellenovitec/CIPP"
+                "type": "string"
             },
             "branch": {
-                "value": "main"
+                "type": "string"
             },
             "repositoryToken": {
-                "value": "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" 
+                "type": "securestring"
             },
             "appLocation": {
-                "value": "/"
+                "type": "string"
             },
             "apiLocation": {
-                "value": ""
+                "type": "string"
             },
             "appArtifactLocation": {
-                "value": "src"
+                "type": "string"
             },
             "resourceTags": {
-                "value": {
-                    "Environment": "Development",
-                    "Project": "Testing SWA with ARM",
-                    "ApplicationName": "myfirstswadeployment"
-                }
+                "type": "object"
             },
             "appSettings": {
-                "value": {
-                    "MY_APP_SETTING1": "value 1",
-                    "MY_APP_SETTING2": "value 2"
-                }
+                "type": "object"
             }
-        }
+        },
+        "resources": [
+            {
+                "apiVersion": "2021-01-15",
+                "name": "[parameters('name')]",
+                "type": "Microsoft.Web/staticSites",
+                "location": "[parameters('location')]",
+                "tags": "[parameters('resourceTags')]",
+                "properties": {
+                    "repositoryUrl": "[parameters('repositoryUrl')]",
+                    "branch": "[parameters('branch')]",
+                    "repositoryToken": "[parameters('repositoryToken')]",
+                    "buildProperties": {
+                        "appLocation": "[parameters('appLocation')]",
+                        "apiLocation": "[parameters('apiLocation')]",
+                        "appArtifactLocation": "[parameters('appArtifactLocation')]"
+                    }
+                },
+                "sku": {
+                    "Tier": "[parameters('sku')]",
+                    "Name": "[parameters('skuCode')]"
+                },
+                "resources":[
+                    {
+                        "apiVersion": "2021-01-15",
+                        "name": "appsettings",
+                        "type": "config",
+                        "location": "[parameters('location')]",
+                        "properties": "[parameters('appSettings')]",
+                        "dependsOn": [
+                            "[resourceId('Microsoft.Web/staticSites', parameters('name'))]"
+                        ]
+                    }
+                ]
+            }
+        ]
     }
